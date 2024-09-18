@@ -1,0 +1,104 @@
+version: '3.5'
+
+services:
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    networks:
+      - backend
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3.75g
+    environment:
+      - REDIS_HOST=redis
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    networks:
+      - backend
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=redis
+    ports:
+      - ${REDIS_COMMAND_PORT:-8081}:8081
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:16.2
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB_MAIN: ${DB_MAIN}
+      POSTGRES_DB_TEST: ${DB_TEST}
+    ports:
+      - ${DB_PORT:-5432}:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    networks:
+      - backend
+
+  influxdb:
+    container_name: influxdb
+    image: influxdb:1.8
+    networks:
+      - backend
+    ports:
+      - '8086:8086'
+    environment:
+      - INFLUXDB_DB=k6
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:8.5.21
+    networks:
+      - backend
+    ports:
+      - '3000:3000'
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - ./dashboards:/var/lib/grafana/dashboards
+      - .config/grafana-dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+      - .config/grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+
+  k6:
+    image: grafana/k6:latest
+    networks:
+      - backend
+    ports:
+      - '6565:6565'
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
+    volumes:
+      - ./test:/test
+
+networks:
+  backend:
+
+volumes:
+  pg_data:
+  node_modules:
