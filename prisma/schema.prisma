@@ -13,21 +13,97 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       String  @id @default(uuid())
-  email    String  @unique
-  name     String?
-  posts    Post[]
-  password String
+enum Role {
+  customer
+  admin
 }
 
-model Post {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  title     String   @db.VarChar(255)
-  content   String?
-  published Boolean  @default(false)
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
+enum OrderStatus {
+  pending
+  processing
+  shipped
+  delivered
+  cancelled
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
+}
+
+model User {
+  wallet_address String   @id
+  name           String
+  role           Role     @default(customer)
+  created_at     DateTime @default(now())
+
+  // Relationships
+  orders    Order[]
+  addresses Address[]
+}
+
+model Product {
+  product_id     Int      @id @default(autoincrement())
+  name           String
+  description    String?
+  price          Decimal  @db.Decimal(10, 2)
+  stock_quantity Int      @default(0)
+  image_url      String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  order_items OrderItem[]
+}
+
+model Order {
+  order_id            String      @id @default(uuid())
+  userWallet          String
+  order_date          DateTime    @default(now())
+  status              OrderStatus @default(pending)
+  total_amount        Decimal     @db.Decimal(10, 2)
+  shipping_address_id Int
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+
+  // Relationships
+  user             User        @relation(fields: [userWallet], references: [wallet_address])
+  shipping_address Address     @relation("ShippingAddress", fields: [shipping_address_id], references: [address_id])
+  order_items      OrderItem[]
+}
+
+model OrderItem {
+  order_item_id Int      @id @default(autoincrement())
+  order_id      String
+  product_id    Int
+  quantity      Int
+  unit_price    Decimal  @db.Decimal(10, 2)
+  total_price   Decimal  @db.Decimal(10, 2)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relationships
+  order   Order   @relation(fields: [order_id], references: [order_id])
+  product Product @relation(fields: [product_id], references: [product_id])
+
+  @@index([order_id])
+  @@index([product_id])
+}
+
+model Address {
+  address_id     Int      @id @default(autoincrement())
+  userWallet     String
+  recipient_name String
+  street         String
+  city           String
+  state          String
+  postal_code    String
+  country        String
+  phone_number   String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  // Relationships
+  user            User    @relation(fields: [userWallet], references: [wallet_address])
+  shipping_orders Order[] @relation("ShippingAddress")
 }

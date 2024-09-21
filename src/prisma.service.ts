@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client'
 export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
     super({
-      // log: ['query', 'error'],
+      log: process.env.IS_SHOW_DB_LOG === 'true' ? ['query', 'error'] : [],
     })
   }
 

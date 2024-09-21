@@ -27,6 +27,8 @@ const isProd = NODE_ENV === 'production'
       isGlobal: true,
       validationSchema: Joi.object({
         DATABASE_URL: Joi.string().required(),
+        IS_SHOW_DB_LOG: Joi.boolean().default(false),
+
         REDIS_HOST: Joi.string().required().default('localhost'),
         REDIS_PORT: Joi.string().required().default(6379),
 

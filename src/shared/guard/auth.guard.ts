@@ -18,7 +18,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest()
-    const response = context.switchToHttp().getResponse()
 
     try {
       const accessToken = ExtractJwt.fromExtractors([this.cookieExtractor])(
@@ -30,24 +29,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       const isOk = await this.authService.validateToken(accessToken)
       if (isOk) return this.activate(context)
-
-      const refreshToken = request.cookies[TOKEN.REFRESH]
-      if (!refreshToken)
-        throw new UnauthorizedException('Refresh token is not set')
-
-      const newToken = await this.authService.refreshToken(refreshToken)
-      if (!newToken)
-        throw new UnauthorizedException('Refresh token is not valid')
-
-      const jwtOption = this.authService.option()
-      response.cookie(TOKEN.ACCESS, newToken, jwtOption)
-      request.cookies[TOKEN.ACCESS] = newToken
-
-      return this.activate(context)
     } catch (error) {
-      response.clearCookie(TOKEN.ACCESS)
-      response.clearCookie(TOKEN.REFRESH)
-
       return false
     }
   }

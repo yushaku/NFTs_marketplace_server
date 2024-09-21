@@ -1,5 +1,12 @@
 import { TOKEN } from '@/shared/constant'
-import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ApiTags } from '@nestjs/swagger'
 import { ThrottlerGuard } from '@nestjs/throttler'
@@ -23,18 +30,17 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
-  async login(@Body() userDto: UserDto) {
-    return this.authService.login(userDto)
+  async login(
+    @Body() userDto: UserDto,
+    @Res({ passthrough: true }) res: FastifyReply,
+  ) {
+    const access_token = await this.authService.login(userDto)
+    this.setToken(res, { access_token })
+    res.status(200).send({ message: 'Auth Successfully', access_token })
   }
 
-  protected setToken(res: FastifyReply, { access_token, refresh_token }) {
+  protected setToken(res: FastifyReply, { access_token }) {
     res.cookie(TOKEN.ACCESS, access_token, {
-      httpOnly: true,
-      sameSite: this.isDevelopment ? 'lax' : 'strict',
-      secure: this.isDevelopment ? false : true,
-      path: '/',
-    })
-    res.cookie(TOKEN.REFRESH, refresh_token, {
       httpOnly: true,
       sameSite: this.isDevelopment ? 'lax' : 'strict',
       secure: this.isDevelopment ? false : true,

@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 
 type TokenPayload = {
-  userId: string
+  address: string
 }
 
 export type Invitetoken = {
@@ -72,7 +72,7 @@ export class JWTService {
         secret: this.REFRESH_SECRET,
       },
     )
-    return this.createAccessToken({ userId: payload.userId })
+    return this.createAccessToken({ address: payload.address })
   }
 
   public emailToken(payload: Invitetoken) {
