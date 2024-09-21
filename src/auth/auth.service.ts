@@ -1,7 +1,9 @@
 import { PrismaService } from '@/prisma.service'
 import { JWTService } from '@/shared/jwt.service'
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { UserDto } from './dto/user.dto'
+import { verifyMessage } from 'ethers'
+import { LOGIN_MESSAGE } from '@/shared/constant'
 
 @Injectable()
 export class AuthService {
@@ -10,7 +12,12 @@ export class AuthService {
     private jwt: JWTService,
   ) {}
 
-  async login({ address }: UserDto) {
+  async login({ address, signedMessage }: UserDto) {
+    const verified = await this.verifySignature(address, signedMessage)
+    if (!verified) {
+      throw new BadRequestException('Invalid signature')
+    }
+
     let user = await this.prisma.user.findUnique({
       where: { wallet_address: address },
     })
@@ -24,7 +31,22 @@ export class AuthService {
       })
     }
 
-    const token = this.jwt.createAccessToken({ address })
-    return token
+    return this.jwt.createAccessToken({
+      address,
+      role: user.role,
+    })
+  }
+
+  async verifySignature(
+    address: string,
+    signedMessage: string,
+  ): Promise<boolean> {
+    try {
+      const recoveredAddress = verifyMessage(LOGIN_MESSAGE, signedMessage)
+      return recoveredAddress.toLowerCase() === address.toLowerCase()
+    } catch (error) {
+      console.error('Signature verification failed:', error)
+      return false
+    }
   }
 }

@@ -36,7 +36,10 @@ export class AuthController {
   ) {
     const access_token = await this.authService.login(userDto)
     this.setToken(res, { access_token })
-    res.status(200).send({ message: 'Auth Successfully', access_token })
+    res.status(200).send({
+      message: 'Auth Successfully',
+      access_token,
+    })
   }
 
   protected setToken(res: FastifyReply, { access_token }) {
