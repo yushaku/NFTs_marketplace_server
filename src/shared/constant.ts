@@ -4,6 +4,9 @@ export enum QUEUE_LIST {
   AUTH = 'AUTH',
 }
 
+export const LOGIN_MESSAGE =
+  'Welcome to Yushaku! Please sign this message to verify account ownership.'
+
 export enum TOKEN {
   REFRESH = 'refresh_token',
   ACCESS = 'access_token',

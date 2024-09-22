@@ -133,7 +133,7 @@ importers:
         version: 7.8.1
     devDependencies:
       '@nestjs/cli':
-        specifier: ^10.1.18
+        specifier: ^10.4.2
         version: 10.4.2(@swc/cli@0.1.65(@swc/core@1.6.13)(chokidar@3.6.0))(@swc/core@1.6.13)
       '@nestjs/schematics':
         specifier: ^10.0.2

@@ -14,6 +14,8 @@ import { AuthModule } from './auth/auth.module'
 import { PrismaService } from './prisma.service'
 import { ShareModule } from './shared/share.module'
 import { UserModule } from './user/user.module'
+import { OrderModule } from './order/order.module'
+import { ProductsModule } from './products/products.module'
 
 import Redis from 'ioredis'
 import Joi from 'joi'
@@ -98,6 +100,8 @@ const isProd = NODE_ENV === 'production'
     UserModule,
     AuthModule,
     ShareModule,
+    OrderModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [PrismaService],
