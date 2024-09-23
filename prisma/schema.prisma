@@ -59,7 +59,7 @@ model Product {
 
 model Order {
   order_id            String      @id @default(uuid())
-  userWallet          String
+  user_wallet         String
   order_date          DateTime    @default(now())
   status              OrderStatus @default(pending)
   total_amount        Decimal     @db.Decimal(10, 2)
@@ -68,7 +68,7 @@ model Order {
   updated_at          DateTime    @updatedAt
 
   // Relationships
-  user             User        @relation(fields: [userWallet], references: [wallet_address])
+  user             User        @relation(fields: [user_wallet], references: [wallet_address])
   shipping_address Address     @relation("ShippingAddress", fields: [shipping_address_id], references: [address_id])
   order_items      OrderItem[]
 }
@@ -93,18 +93,15 @@ model OrderItem {
 
 model Address {
   address_id     Int      @id @default(autoincrement())
-  userWallet     String
+  user_wallet    String
   recipient_name String
+  phone_number   String?
   street         String
   city           String
-  state          String
-  postal_code    String
-  country        String
-  phone_number   String?
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 
   // Relationships
-  user            User    @relation(fields: [userWallet], references: [wallet_address])
+  user            User    @relation(fields: [user_wallet], references: [wallet_address])
   shipping_orders Order[] @relation("ShippingAddress")
 }

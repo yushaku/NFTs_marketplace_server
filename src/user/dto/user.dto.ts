@@ -16,3 +16,27 @@ export class RegisterDTO extends LoginDTO {
   @IsString()
   inviteCode: string
 }
+
+export class CreateAddressDto {
+  @ApiProperty({ required: true })
+  @IsString()
+  recipient_name: string
+
+  @ApiProperty({ required: true })
+  @IsString()
+  street: string
+
+  @ApiProperty({ required: true })
+  @IsString()
+  city: string
+
+  @ApiProperty({ required: true })
+  @IsString()
+  phone_number: string
+}
+
+export class UpdateAddressDto extends CreateAddressDto {
+  @ApiProperty({ required: true })
+  @IsString()
+  address_id: number
+}
