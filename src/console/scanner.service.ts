@@ -1,0 +1,158 @@
+import { SHOP_PAYMENT_ABI } from '@/abi/shopPayment'
+import { PrismaService } from '@/prisma.service'
+import { JOB_LIST, KEYS, QUEUE_LIST, RPC, TOPICS } from '@/shared/constant'
+import { sleep } from '@/shared/utils'
+import { InjectQueue } from '@nestjs/bullmq'
+import { Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { Queue } from 'bullmq'
+import { Interface, JsonRpcProvider, Log } from 'ethers'
+import { Command, CommandRunner } from 'nest-commander'
+
+@Command({ name: 'scanner' })
+export class ScannerService extends CommandRunner {
+  logger = new Logger(ScannerService.name)
+
+  BLOCK_RANGE = Number(process.env.BLOCK_RANGE || 100)
+  contract = new Interface(SHOP_PAYMENT_ABI)
+  invertedTopics = Object.fromEntries(
+    Object.entries(TOPICS).map(([key, value]) => [value, key]),
+  )
+
+  info: (typeof RPC)['56' | '97']
+  isDevMode = false
+  provider: JsonRpcProvider
+
+  constructor(
+    @InjectQueue(QUEUE_LIST.CONTRACT) private queue: Queue,
+    private prisma: PrismaService,
+    private config: ConfigService,
+  ) {
+    super()
+    this.info = RPC[this.config.get('THE_CHAIN_ID') ?? 97]
+    this.provider = new JsonRpcProvider(this.info.rpcUrls, {
+      name: this.info.name,
+      chainId: this.info.chainId,
+    })
+    this.isDevMode = this.config.get('NODE_ENV') === 'development'
+  }
+
+  async run(): Promise<void> {
+    let index = 1
+    while (true) {
+      try {
+        await this.queue.add(
+          JOB_LIST.ORDER_PAID,
+          {
+            data: 'test message',
+            index,
+          },
+          {
+            jobId: `job-${index}-d50457a7-2a9c-4a0d-ac4e-66091c28d321`,
+            removeOnComplete: {
+              age: 3600, // Keep completed jobs for 1 hour
+            },
+            removeOnFail: {
+              age: 3600, // Keep failed jobs for 1 hour
+            },
+          },
+        )
+
+        await sleep(100)
+        index++
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    // let fromBlock = await this.getCurrentBlock()
+    // let stone = fromBlock
+    //
+    // while (true) {
+    //   const data = await this.provider.getLogs({
+    //     fromBlock,
+    //     toBlock: fromBlock + this.BLOCK_RANGE,
+    //     address: [this.info.shopPayment],
+    //   })
+    //
+    //   data.forEach(async (log) => {
+    //     await this.analyzeLog(log)
+    //   })
+    //
+    //   if (data.length === 0) {
+    //     const latestBlock = await this.getLatestBlock()
+    //     fromBlock = latestBlock
+    //       ? Math.min(latestBlock, fromBlock + this.BLOCK_RANGE)
+    //       : fromBlock + this.BLOCK_RANGE
+    //     await sleep(3_000)
+    //   } else {
+    //     const lastBlock = data.at(-1)?.blockNumber ?? fromBlock
+    //     fromBlock = lastBlock + 1
+    //   }
+    //
+    //   if (fromBlock >= stone) {
+    //     stone = fromBlock + this.BLOCK_RANGE
+    //     await this.setCurrentBlock(fromBlock)
+    //     this.logger.log(`Scan to block ${fromBlock}`)
+    //   }
+    // }
+  }
+
+  async analyzeLog(log: Log) {
+    const topic = log.topics[0]
+    if (!this.invertedTopics[topic]) return
+
+    const decodedLog = this.contract.parseLog(log)
+    if (this.isDevMode)
+      console.log({
+        type: decodedLog.name,
+        args: decodedLog.args,
+      })
+
+    try {
+      switch (topic) {
+        case TOPICS.ORDER_PAID: {
+        }
+
+        default:
+          break
+      }
+    } catch (error) {
+      this.logger.error('Failed to handle log: ', log.transactionHash)
+    }
+  }
+
+  async getLatestBlock() {
+    try {
+      const latestBlock = await this.provider.getBlock('latest')
+      return latestBlock?.number
+    } catch (error) {
+      return null
+    }
+  }
+
+  async getCurrentBlock() {
+    const data = await this.prisma.config.findUnique({
+      where: {
+        key: KEYS.CURRENT_BLOCK,
+      },
+    })
+
+    return Number(data?.value ?? this.config.get('EVM_BLOCK'))
+  }
+
+  async setCurrentBlock(value: string | number) {
+    return this.prisma.config.upsert({
+      where: {
+        key: KEYS.CURRENT_BLOCK,
+      },
+      create: {
+        key: KEYS.CURRENT_BLOCK,
+        value: value.toString(),
+      },
+      update: {
+        value: value.toString(),
+      },
+    })
+  }
+}
