@@ -1,7 +1,12 @@
 import 'dotenv/config'
 
+export const KEYS = {
+  CURRENT_BLOCK: 'CURRENT_BLOCK',
+}
+
 export enum QUEUE_LIST {
   AUTH = 'AUTH',
+  CONTRACT = 'CONTRACT',
 }
 
 export const LOGIN_MESSAGE =
@@ -10,6 +15,33 @@ export const LOGIN_MESSAGE =
 export enum TOKEN {
   REFRESH = 'refresh_token',
   ACCESS = 'access_token',
+}
+
+export const RPC = {
+  '56': {
+    name: 'bsc',
+    chainId: 56,
+    rpcUrls: 'https://bsc-dataseed1.binance.org/',
+    shopPayment: '',
+  },
+  '97': {
+    name: 'bsc testnet',
+    chainId: 97,
+    rpcUrls: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+    shopPayment: '0x4E3DdcCeEf165fC30F876cf81b4d7a80C2A1A7bD',
+  },
+} as const
+
+export const TOPICS = {
+  ORDER_PAID: 'ORDER_PAID',
+  ORDER_CANCELLED: 'ORDER_CANCELLED',
+  ORDER_DELIVERED: 'ORDER_DELIVERED',
+}
+
+export const JOB_LIST = {
+  ORDER_PAID: 'ORDER_PAID',
+  ORDER_CANCELLED: 'ORDER_CANCELLED',
+  ORDER_DELIVERED: 'ORDER_DELIVERED',
 }
 
 export const HttpCodeMessages = {

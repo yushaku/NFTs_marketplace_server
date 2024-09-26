@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { JWTService } from './jwt.service'
 import { JwtStrategy } from './strategy'
+import { ChainLinkService } from './ChainLink.service'
 
 @Global()
 @Module({
@@ -19,7 +20,7 @@ import { JwtStrategy } from './strategy'
       }),
     }),
   ],
-  providers: [JWTService, JwtStrategy],
-  exports: [JWTService],
+  providers: [JWTService, JwtStrategy, ChainLinkService],
+  exports: [JWTService, ChainLinkService],
 })
 export class ShareModule {}
