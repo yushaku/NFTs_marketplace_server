@@ -3,12 +3,18 @@ import { CreateOrderDto } from './dto/create-order.dto'
 import { PrismaService } from '@/prisma.service'
 import { PaginationDto } from '@/shared/dto'
 import { Decimal } from '@prisma/client/runtime/library'
+import { ChainLinkService } from '@/shared/ChainLink.service'
 
 @Injectable()
 export class OrderService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private LinkPriceFeed: ChainLinkService,
+  ) {}
 
-  async create({ products }: CreateOrderDto, user_wallet: string) {
+  async create({ products, address_id }: CreateOrderDto, user_wallet: string) {
+    const price = await this.LinkPriceFeed.getPrice('BNB')
+
     const items = await this.prisma.product.findMany({
       where: {
         product_id: {
@@ -26,7 +32,8 @@ export class OrderService {
       data: {
         user_wallet,
         total_amount: totalMoney,
-        shipping_address_id: 1,
+        price_in_token: totalMoney.dividedBy(new Decimal(price)),
+        shipping_address_id: address_id,
       },
       select: {
         order_id: true,
@@ -39,12 +46,14 @@ export class OrderService {
           (i) => i.product_id === item.product_id,
         ).price
 
+        const total_price = unitPrice.times(item.quantity)
         return {
           order_id: order.order_id,
           product_id: item.product_id,
           quantity: item.quantity,
           unit_price: unitPrice,
-          total_price: unitPrice.times(item.quantity),
+          total_price,
+          price_in_token: total_price.dividedBy(new Decimal(price)),
         }
       }),
     })

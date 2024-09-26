@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { Type } from 'class-transformer'
 import {
   ArrayMinSize,
   IsArray,
@@ -6,14 +7,12 @@ import {
   IsNotEmpty,
   IsNumber,
   IsPositive,
-  IsString,
   Min,
   ValidateNested,
 } from 'class-validator'
-import { Type } from 'class-transformer'
 
 class ProductDto {
-  @IsString()
+  @IsNumber()
   @IsNotEmpty({ message: 'Product ID is required' })
   @ApiProperty({
     example: '12345',
@@ -44,5 +43,8 @@ export class CreateOrderDto {
 
   @IsInt()
   @Min(1)
+  @ApiProperty({
+    description: 'ID of address of user',
+  })
   address_id: number
 }

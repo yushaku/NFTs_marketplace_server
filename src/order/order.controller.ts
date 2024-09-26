@@ -28,7 +28,7 @@ export class OrderController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  find(@JwtUser() { address }: JwtDecoded, @Param() id: string) {
+  find(@JwtUser() { address }: JwtDecoded, @Param('id') id: string) {
     return this.orderService.getOrderDetail(address, id)
   }
 
