@@ -7,6 +7,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsPositive,
+  IsUUID,
   Min,
   ValidateNested,
 } from 'class-validator'
@@ -47,4 +48,14 @@ export class CreateOrderDto {
     description: 'ID of address of user',
   })
   address_id: number
+}
+
+export class DeleteOrderDto {
+  @IsArray()
+  @ArrayMinSize(1, { message: 'At least one uuid is required' })
+  @IsUUID('4', { each: true })
+  @ApiProperty({
+    description: 'ID of order of user',
+  })
+  order_ids: string[]
 }

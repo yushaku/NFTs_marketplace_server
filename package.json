@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand --forceExit --detectOpenHandles",
-    "console": "pnpm build && LOG_QUERY=0 node dist/console"
+    "console": "node dist/console"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
@@ -53,6 +53,7 @@
     "joi": "^17.13.3",
     "luxon": "^3.4.4",
     "nest-commander": "^3.14.0",
+    "nestjs-command": "^3.1.4",
     "nestjs-pino": "^4.1.0",
     "nestjs-throttler-storage-redis": "^0.5.0",
     "passport": "^0.7.0",
