@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '@/shared/guard'
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -11,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { CreateOrderDto } from './dto/create-order.dto'
+import { CreateOrderDto, DeleteOrderDto } from './dto/create-order.dto'
 import { OrderService } from './order.service'
 
 @ApiTags('Order')
@@ -38,5 +39,13 @@ export class OrderController {
     @JwtUser() { address }: JwtDecoded,
   ) {
     return this.orderService.create(createOrderDto, address)
+  }
+
+  @Delete()
+  deleteOrder(
+    @Body() data: DeleteOrderDto,
+    @JwtUser() { address }: JwtDecoded,
+  ) {
+    return this.orderService.delete(data, address)
   }
 }

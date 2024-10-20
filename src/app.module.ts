@@ -30,6 +30,7 @@ const isProd = NODE_ENV === 'production'
       validationSchema: Joi.object({
         DATABASE_URL: Joi.string().required(),
         IS_SHOW_DB_LOG: Joi.boolean().default(false),
+        THE_CHAIN_ID: Joi.number().required().default(97),
 
         REDIS_HOST: Joi.string().required().default('localhost'),
         REDIS_PORT: Joi.string().required().default(6379),

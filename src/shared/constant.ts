@@ -18,22 +18,25 @@ export enum TOKEN {
 }
 
 export const RPC = {
-  '56': {
+  56: {
     name: 'bsc',
     chainId: 56,
     rpcUrls: 'https://bsc-dataseed1.binance.org/',
     shopPayment: '',
   },
-  '97': {
+  97: {
     name: 'bsc testnet',
     chainId: 97,
-    rpcUrls: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+    rpcUrls:
+      process.env.PRIVATE_RPC ||
+      'https://data-seed-prebsc-1-s1.binance.org:8545/',
     shopPayment: '0x4E3DdcCeEf165fC30F876cf81b4d7a80C2A1A7bD',
   },
 } as const
 
+// prettier-ignore
 export const TOPICS = {
-  ORDER_PAID: 'ORDER_PAID',
+  ORDER_PAID: '0x48da3edde46115c63addf11fd46fbab76bbb24d17301d4befd6a8311e3c5dc49',
   ORDER_CANCELLED: 'ORDER_CANCELLED',
   ORDER_DELIVERED: 'ORDER_DELIVERED',
 }
