@@ -34,14 +34,97 @@ export const SHOP_PAYMENT_ABI = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: 'uint8',
-        name: 'version',
-        type: 'uint8',
-      },
+      { indexed: false, internalType: 'uint8', name: 'version', type: 'uint8' },
     ],
     name: 'Initialized',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'orderId',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'refundAmount',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'feeAmount',
+        type: 'uint256',
+      },
+    ],
+    name: 'OrderCancelled',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'orderId',
+        type: 'string',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'buyer',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'price',
+        type: 'uint256',
+      },
+    ],
+    name: 'OrderCreated',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'orderId',
+        type: 'string',
+      },
+    ],
+    name: 'OrderDelivered',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'orderId',
+        type: 'string',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'buyer',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'price',
+        type: 'uint256',
+      },
+    ],
+    name: 'OrderPaid',
     type: 'event',
   },
   {
@@ -67,51 +150,6 @@ export const SHOP_PAYMENT_ABI = [
     anonymous: false,
     inputs: [
       {
-        indexed: false,
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-    ],
-    name: 'Paused',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'buyer',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'tokenValue',
-        type: 'uint256',
-      },
-    ],
-    name: 'TokenSold',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'account',
-        type: 'address',
-      },
-    ],
-    name: 'Unpaused',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
         indexed: true,
         internalType: 'address',
         name: 'implementation',
@@ -122,52 +160,72 @@ export const SHOP_PAYMENT_ABI = [
     type: 'event',
   },
   {
-    inputs: [],
-    name: 'buy',
-    outputs: [{ internalType: 'uint256', name: '_valuesold', type: 'uint256' }],
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+    ],
+    name: 'Withdrawn',
+    type: 'event',
+  },
+  { stateMutability: 'payable', type: 'fallback' },
+  {
+    inputs: [{ internalType: 'string', name: '_orderId', type: 'string' }],
+    name: 'cancelOrder',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'string', name: '_orderId', type: 'string' },
+      { internalType: 'uint256', name: '_price', type: 'uint256' },
+    ],
+    name: 'createAndPayOrder',
+    outputs: [],
     stateMutability: 'payable',
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'getPresaleAnalytics',
-    outputs: [
-      { internalType: 'uint256', name: '_ethCollected', type: 'uint256' },
-      { internalType: 'uint256', name: '_tokenSold', type: 'uint256' },
-    ],
-    stateMutability: 'view',
+    inputs: [{ internalType: 'string', name: '_orderId', type: 'string' }],
+    name: 'deliverOrder',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'getPrice',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'getTokenContract',
+    inputs: [{ internalType: 'string', name: '_orderId', type: 'string' }],
+    name: 'getOrder',
     outputs: [
       {
-        internalType: 'address',
-        name: '_tokenContractAddress',
-        type: 'address',
-      },
-      { internalType: 'string', name: '_tokenName', type: 'string' },
-      { internalType: 'string', name: '_tokenSymbol', type: 'string' },
-      { internalType: 'uint256', name: '_tokenDecimals', type: 'uint256' },
-      {
-        internalType: 'address',
-        name: '_tokenSelleraddress',
-        type: 'address',
+        components: [
+          { internalType: 'string', name: 'orderId', type: 'string' },
+          { internalType: 'address', name: 'buyer', type: 'address' },
+          { internalType: 'uint256', name: 'price', type: 'uint256' },
+          { internalType: 'enum Status', name: 'status', type: 'uint8' },
+          { internalType: 'uint256', name: 'createdAt', type: 'uint256' },
+        ],
+        internalType: 'struct Order',
+        name: '',
+        type: 'tuple',
       },
     ],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [],
+    inputs: [{ internalType: 'address', name: '_buyer', type: 'address' }],
+    name: 'getUserOrders',
+    outputs: [{ internalType: 'string[]', name: '', type: 'string[]' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: '_owner', type: 'address' }],
     name: 'initialize',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -182,31 +240,8 @@ export const SHOP_PAYMENT_ABI = [
   },
   {
     inputs: [],
-    name: 'pause',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'paused',
-    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
     name: 'proxiableUUID',
     outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'remainingTokensToSale',
-    outputs: [
-      { internalType: 'uint256', name: '_tokensValueInWei', type: 'uint256' },
-    ],
     stateMutability: 'view',
     type: 'function',
   },
@@ -218,22 +253,15 @@ export const SHOP_PAYMENT_ABI = [
     type: 'function',
   },
   {
-    inputs: [{ internalType: 'uint256', name: '_valueInWei', type: 'uint256' }],
-    name: 'setPrice',
-    outputs: [],
-    stateMutability: 'nonpayable',
+    inputs: [],
+    name: 'totalWithdrawable',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
     name: 'transferOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'unpause',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -259,45 +287,7 @@ export const SHOP_PAYMENT_ABI = [
   },
   {
     inputs: [],
-    name: 'withdrawETH',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: '_to', type: 'address' },
-      { internalType: 'uint256', name: '_valueInWei', type: 'uint256' },
-    ],
-    name: 'withdrawPartialETH',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '_tokenContractAddress',
-        type: 'address',
-      },
-    ],
-    name: 'withdrawToken',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: '_to', type: 'address' },
-      { internalType: 'uint256', name: '_valueInWei', type: 'uint256' },
-      {
-        internalType: 'address',
-        name: '_tokenContractAddress',
-        type: 'address',
-      },
-    ],
-    name: 'withdrawTokenPartially',
+    name: 'withdrawAll',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
