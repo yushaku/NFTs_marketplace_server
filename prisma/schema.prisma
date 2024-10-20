@@ -67,6 +67,7 @@ model Order {
   shipping_address_id Int
   created_at          DateTime    @default(now())
   updated_at          DateTime    @updatedAt
+  encoded             String?
 
   // Relationships
   user             User        @relation(fields: [user_wallet], references: [wallet_address])
@@ -86,7 +87,7 @@ model OrderItem {
   updated_at     DateTime @updatedAt
 
   // Relationships
-  order   Order   @relation(fields: [order_id], references: [order_id])
+  order   Order   @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
   product Product @relation(fields: [product_id], references: [product_id])
 
   @@index([order_id])
