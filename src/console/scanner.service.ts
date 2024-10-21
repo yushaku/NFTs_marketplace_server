@@ -1,6 +1,6 @@
 import { SHOP_PAYMENT_ABI } from '@/abi/shopPayment'
 import { PrismaService } from '@/prisma.service'
-import { JOB_LIST, KEYS, QUEUE_LIST, RPC, TOPICS } from '@/shared/constant'
+import { KEYS, QUEUE_LIST, RPC, TOPICS } from '@/shared/constant'
 import { sleep } from '@/shared/utils'
 import { InjectQueue } from '@nestjs/bullmq'
 import { Logger } from '@nestjs/common'
@@ -43,24 +43,15 @@ export class ScannerService extends CommandRunner {
         fromBlock,
         toBlock: fromBlock + this.BLOCK_RANGE,
         address: [this.info.shopPayment],
-        topics: [TOPICS.ORDER_PAID],
       })
 
       data.forEach(async (log) => {
         const topic = log.topics[0]
         const decodedLog = this.contract.parseLog(log)
-        console.log(decodedLog.args)
 
         await this.queue.add(
-          JOB_LIST.ORDER_PAID,
-          {
-            topic,
-            data: {
-              orderId: decodedLog.args[0],
-              buyer: decodedLog.args[1],
-              price: String(decodedLog.args[2]),
-            },
-          },
+          topic,
+          decodedLog.args.map((value) => value.toString()),
           {
             jobId: log.transactionHash,
             removeOnComplete: {
@@ -105,8 +96,8 @@ export class ScannerService extends CommandRunner {
       },
     })
 
-    // return Number(data?.value ?? this.config.get('EVM_BLOCK'))
-    return Number(this.config.get('EVM_BLOCK'))
+    return Number(data?.value ?? this.config.get('EVM_BLOCK'))
+    // return Number(this.config.get('EVM_BLOCK'))
   }
 
   async setCurrentBlock(value: string | number) {

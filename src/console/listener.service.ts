@@ -1,5 +1,5 @@
 import { SHOP_PAYMENT_ABI } from '@/abi/shopPayment'
-import { JOB_LIST, QUEUE_LIST, RPC } from '@/shared/constant'
+import { QUEUE_LIST, RPC, TOPICS } from '@/shared/constant'
 import { InjectQueue } from '@nestjs/bullmq'
 import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -37,22 +37,9 @@ export class ListenerService extends CommandRunner {
     )
 
     contract.on('OrderCreated', async (_from, _to, _value, event: EventLog) => {
-      console.log({
-        orderId: event.args[0],
-        buyer: event.args[1],
-        price: String(event.args[2]),
-      })
-
       await this.queue.add(
-        JOB_LIST.ORDER_PAID,
-        {
-          topic: 'OrderCreated',
-          data: {
-            orderId: event.args[0],
-            buyer: event.args[1],
-            price: String(event.args[2]),
-          },
-        },
+        TOPICS.ORDER_PAID,
+        event.args.map((value) => value.toString()),
         {
           jobId: event.transactionHash,
           removeOnComplete: {

@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config'
 import { Decimal } from '@prisma/client/runtime/library'
 import { Contract, parseUnits } from 'ethers'
 import { CreateOrderDto, DeleteOrderDto } from './dto/create-order.dto'
+import { OrderStatus } from '@prisma/client'
 
 @Injectable()
 export class OrderService {
@@ -150,6 +151,9 @@ export class OrderService {
       where: {
         order_id: {
           in: order_ids,
+        },
+        status: {
+          notIn: [OrderStatus.shipped, OrderStatus.processing],
         },
         user_wallet,
       },
