@@ -1,3 +1,4 @@
+import { IsEthAddress } from '@/shared/validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import {
@@ -48,6 +49,10 @@ export class CreateOrderDto {
     description: 'ID of address of user',
   })
   address_id: number
+
+  @IsEthAddress()
+  @ApiProperty()
+  token_address: string
 }
 
 export class DeleteOrderDto {

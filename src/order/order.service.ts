@@ -1,24 +1,28 @@
-import { SHOP_PAYMENT_ABI } from '@/abi/shopPayment'
 import { PrismaService } from '@/prisma.service'
 import { ChainLinkService } from '@/shared/ChainLink.service'
-import { RPC } from '@/shared/constant'
 import { PaginationDto } from '@/shared/dto'
+import { PaymentService } from '@/shared/ShopPayment.service'
 import { BadRequestException, Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import { Decimal } from '@prisma/client/runtime/library'
-import { Contract, parseUnits } from 'ethers'
-import { CreateOrderDto, DeleteOrderDto } from './dto/create-order.dto'
 import { OrderStatus } from '@prisma/client'
+import { Decimal } from '@prisma/client/runtime/library'
+import { CreateOrderDto, DeleteOrderDto } from './dto/create-order.dto'
 
 @Injectable()
 export class OrderService {
   constructor(
-    private config: ConfigService,
     private prisma: PrismaService,
     private LinkPriceFeed: ChainLinkService,
+    private paymentService: PaymentService,
   ) {}
 
-  async create({ products, address_id }: CreateOrderDto, user_wallet: string) {
+  async create(
+    { products, address_id, token_address }: CreateOrderDto,
+    user_wallet: string,
+  ) {
+    const isPayableToken =
+      await this.paymentService.isPayableToken(token_address)
+    if (!isPayableToken) throw new BadRequestException('Token not payable')
+
     const existedProduct = await this.prisma.product.findMany({
       where: {
         product_id: {
@@ -74,15 +78,11 @@ export class OrderService {
     })
     await this.prisma.orderItem.createMany({ data: orderList })
 
-    const contract = new Contract(
-      RPC[this.config.get('THE_CHAIN_ID')].shopPayment,
-      SHOP_PAYMENT_ABI,
-    )
-
-    const data = contract.interface.encodeFunctionData('createAndPayOrder', [
+    const data = this.paymentService.encodeCreateOrder(
       order.order_id,
-      parseUnits(order.price_in_token.toString(), 'ether'),
-    ])
+      token_address,
+      order.price_in_token.toString(),
+    )
 
     await this.prisma.order.update({
       where: { order_id: order.order_id },
@@ -153,7 +153,7 @@ export class OrderService {
           in: order_ids,
         },
         status: {
-          notIn: [OrderStatus.shipped, OrderStatus.processing],
+          notIn: [OrderStatus.shipped, OrderStatus.paid],
         },
         user_wallet,
       },
@@ -162,6 +162,40 @@ export class OrderService {
     return {
       message: 'Delete success',
       order,
+    }
+  }
+
+  async allOrders({ page, perPage }: PaginationDto) {
+    const [total, orders] = await this.prisma.$transaction([
+      this.prisma.order.count(),
+      this.prisma.order.findMany({
+        take: perPage,
+        where: {
+          status: {
+            notIn: [OrderStatus.pending],
+          },
+        },
+        include: {
+          order_items: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  banner: true,
+                },
+              },
+            },
+          },
+        },
+        skip: (page - 1) * perPage,
+      }),
+    ])
+
+    return {
+      total,
+      page,
+      perPage,
+      data: orders,
     }
   }
 }

@@ -2,6 +2,7 @@ import { TOKEN } from '@/shared/constant'
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Post,
   Res,
@@ -40,6 +41,11 @@ export class AuthController {
       message: 'Auth Successfully',
       access_token,
     })
+  }
+
+  @Get('admin')
+  async getAdmin() {
+    return this.authService.getAdmin()
   }
 
   protected setToken(res: FastifyReply, { access_token }) {

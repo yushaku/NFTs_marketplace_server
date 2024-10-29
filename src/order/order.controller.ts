@@ -1,6 +1,6 @@
 import { JwtDecoded, JwtUser } from '@/shared/decorators'
 import { PaginationDto } from '@/shared/dto'
-import { JwtAuthGuard } from '@/shared/guard'
+import { AdminGuard, JwtAuthGuard } from '@/shared/guard'
 import {
   Body,
   Controller,
@@ -25,6 +25,12 @@ export class OrderController {
   @UseGuards(JwtAuthGuard)
   findAll(@JwtUser() { address }: JwtDecoded, @Query() query: PaginationDto) {
     return this.orderService.findAll(address, query)
+  }
+
+  @Get('admin')
+  @UseGuards(AdminGuard)
+  findALlByAdmin(@Query() query: PaginationDto) {
+    return this.orderService.allOrders(query)
   }
 
   @Get(':id')

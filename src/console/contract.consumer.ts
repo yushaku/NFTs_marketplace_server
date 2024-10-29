@@ -28,7 +28,7 @@ export class ContractConsumer extends WorkerHost {
           await this.prisma.order.update({
             where: { order_id },
             data: {
-              status: OrderStatus.processing,
+              status: OrderStatus.paid,
             },
           })
           break

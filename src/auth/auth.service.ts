@@ -4,6 +4,7 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { UserDto } from './dto/user.dto'
 import { verifyMessage } from 'ethers'
 import { LOGIN_MESSAGE } from '@/shared/constant'
+import { Role } from '@prisma/client'
 
 @Injectable()
 export class AuthService {
@@ -34,6 +35,14 @@ export class AuthService {
     return this.jwt.createAccessToken({
       address,
       role: user.role,
+    })
+  }
+
+  async getAdmin() {
+    return this.prisma.user.findMany({
+      where: {
+        role: Role.admin,
+      },
     })
   }
 
