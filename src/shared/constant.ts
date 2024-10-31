@@ -30,15 +30,15 @@ export const RPC = {
     rpcUrls:
       process.env.PRIVATE_RPC ||
       'https://data-seed-prebsc-1-s1.binance.org:8545/',
-    shopPayment: '0xDAD526733737C50b2269f5CEAcA803EC4C178DCD',
+    shopPayment: '0x6b3De2f71bbeeEc360Cd50f6C19Daf13534bE8EA',
   },
 } as const
 
 // prettier-ignore
 export const TOPICS = {
   ORDER_PAID: '0x90e1d0c46d2502169585bdac3bfaab23d6d93307febf995c863d64dafc6ab886',
-  ORDER_CANCELLED: '0x4c8b41436ecae77f25d6995ace6a2e753636dac3c8ae00ff0160c745c03d06d1',
-  ORDER_DELIVERED: 'ORDER_DELIVERED',
+  ORDER_CANCELLED: '0x7238c54289856123baca2546d37161f2e0b6967231fc8d004dd849d1f4f987e6',
+  ORDER_DELIVERED: '0x0428dc7031c0c35b6cfc8c2573c1f2eecf691dcffacf2a33fd549f311ae5f29d',
 }
 
 export const HttpCodeMessages = {

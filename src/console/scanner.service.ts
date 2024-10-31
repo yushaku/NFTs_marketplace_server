@@ -51,7 +51,10 @@ export class ScannerService extends CommandRunner {
 
         await this.queue.add(
           topic,
-          decodedLog.args.map((value) => value.toString()),
+          {
+            transactionHash: log.transactionHash,
+            args: decodedLog.args.map((value) => value.toString()),
+          },
           {
             jobId: log.transactionHash,
             removeOnComplete: {

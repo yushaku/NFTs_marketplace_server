@@ -64,3 +64,5 @@ export class DeleteOrderDto {
   })
   order_ids: string[]
 }
+
+export class UpdateOrderDto extends DeleteOrderDto {}

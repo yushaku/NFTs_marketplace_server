@@ -165,6 +165,27 @@ export class OrderService {
     }
   }
 
+  async updateShipping({ order_ids }: DeleteOrderDto) {
+    const order = await this.prisma.order.updateMany({
+      where: {
+        order_id: {
+          in: order_ids,
+        },
+        status: {
+          in: [OrderStatus.paid],
+        },
+      },
+      data: {
+        status: OrderStatus.delivering,
+      },
+    })
+
+    return {
+      message: 'Change status delivering success',
+      order,
+    }
+  }
+
   async allOrders({ page, perPage }: PaginationDto) {
     const [total, orders] = await this.prisma.$transaction([
       this.prisma.order.count(),

@@ -8,11 +8,16 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { CreateOrderDto, DeleteOrderDto } from './dto/create-order.dto'
+import {
+  CreateOrderDto,
+  DeleteOrderDto,
+  UpdateOrderDto,
+} from './dto/create-order.dto'
 import { OrderService } from './order.service'
 
 @ApiTags('Order')
@@ -53,5 +58,11 @@ export class OrderController {
     @JwtUser() { address }: JwtDecoded,
   ) {
     return this.orderService.delete(data, address)
+  }
+
+  @Put('deliver')
+  @UseGuards(AdminGuard)
+  shipOrder(@Body() data: UpdateOrderDto) {
+    return this.orderService.updateShipping(data)
   }
 }
